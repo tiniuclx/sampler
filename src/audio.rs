@@ -181,6 +181,7 @@ pub mod wav {
                 (source, target) if source == target => {
                     let samples = boxed_samples.iter().cloned();
                     let vec: Vec<F> = dasp::signal::from_interleaved_samples_iter(samples)
+                        .until_exhausted()
                         .collect();
                     vec.into_boxed_slice()
                 },
@@ -190,6 +191,7 @@ pub mod wav {
                     let samples = boxed_samples.iter().cloned();
                     let vec: Vec<F> = 
                         dasp::signal::from_interleaved_samples_iter::<_, [F::Sample; 2]>(samples)
+                            .until_exhausted()
                             .filter_map(|f| {
                                 let mut channels = f.channels();
                                 channels.next()
@@ -218,9 +220,11 @@ pub mod wav {
             };
 
             // Convert the sample rate to our target sample rate.
-            let frames: Vec<F> = boxed_frames.iter().cloned()
-                .from_hz_to_hz(spec.sample_rate as f64, target_sample_hz)
-                .collect();
+            let source = dasp::signal::from_iter(boxed_frames.iter().cloned());
+            let interp = dasp::interpolate::linear::Linear::new(source.next(), source.next());
+
+            let frames_collect = source.from_hz_to_hz(interp, spec.sample_rate as f64, target_sample_hz);
+            let frames: Vec<F> = frames_collect.into_source().until_exhausted().collect();
 
             Ok(Audio {
                 path: path.to_path_buf(),
