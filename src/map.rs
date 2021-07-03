@@ -146,7 +146,7 @@ pub mod wav {
     use audio;
     use map;
     use pitch;
-    use sample;
+    use dasp;
     use std;
 
 
@@ -155,9 +155,9 @@ pub mod wav {
 
 
     impl<F> Sample<F>
-        where F: sample::Frame,
-              F::Sample: sample::Duplex<f64> + sample::Duplex<i32>,
-              Box<[F::Sample]>: sample::ToBoxedFrameSlice<F>,
+        where F: dasp::Frame,
+              F::Sample: dasp::sample::Duplex<f64> + dasp::sample::Duplex<i32>,
+              Box<[F::Sample]>: dasp::slice::ToBoxedFrameSlice<F>,
     {
 
         /// Loads a `Sample` from the `.wav` file at the given `path`.

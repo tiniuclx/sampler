@@ -20,7 +20,7 @@ fn run() -> Result<(), pa::Error> {
 
     // We'll create a sample map that maps a single sample to the entire note range.
     let assets = find_folder::Search::ParentsThenKids(5, 5).for_folder("assets").unwrap();
-    let sample = sampler::Sample::from_wav_file(assets.join(THUMB_PIANO), SAMPLE_RATE).unwrap();
+    let sample = sampler::dasp::from_wav_file(assets.join(THUMB_PIANO), SAMPLE_RATE).unwrap();
     let sample_map = sampler::Map::from_single_sample(sample);
 
     // Create a polyphonic sampler.
@@ -33,8 +33,8 @@ fn run() -> Result<(), pa::Error> {
 
     let callback = move |pa::OutputStreamCallbackArgs { buffer, .. }| {
         let buffer: &mut [[f32; CHANNELS as usize]] =
-            sample::slice::to_frame_slice_mut(buffer).unwrap();
-        sample::slice::equilibrium(buffer);
+            dasp::slice::to_frame_slice_mut(buffer).unwrap();
+        dasp::slice::equilibrium(buffer);
 
         // If the sampler is not currently active, play a note.
         if !sampler.is_active() {

@@ -217,8 +217,8 @@ impl<M, NFG, A> Sampler<M, NFG, A>
     /// Produces an iterator that yields `Frame`s of audio data.
     pub fn frames(&mut self, sample_hz: f64) -> Frames<A, NFG::NoteFreq>
         where A: Audio,
-              <A::Frame as Frame>::Sample: sample::Duplex<f64>,
-              <<A::Frame as Frame>::Sample as PcmSample>::Float: sample::FromSample<f32>,
+              <A::Frame as Frame>::Sample: dasp::sample::Duplex<f64>,
+              <<A::Frame as Frame>::Sample as PcmSample>::Float: dasp::sample::FromSample<f32>,
     {
         Frames {
             voices: &mut self.voices,
@@ -239,14 +239,14 @@ impl<M, NFG, A> Sampler<M, NFG, A>
     /// Fills the given slice of frames with the `Sampler::frames` iterator.
     pub fn fill_slice<F>(&mut self, output: &mut [F], sample_hz: f64)
         where F: Frame,
-              F::Sample: sample::Duplex<f64>,
-              <F::Sample as PcmSample>::Float: sample::FromSample<f32>,
+              F::Sample: dasp::sample::Duplex<f64>,
+              <F::Sample as PcmSample>::Float: dasp::sample::FromSample<f32>,
               A: Audio<Frame=F>,
     {
         let mut frames = self.frames(sample_hz);
-        sample::slice::map_in_place(output, |f| {
+        dasp::slice::map_in_place(output, |f| {
             f.zip_map(frames.next_frame(), |a, b| {
-                a.add_amp(b.to_sample::<<F::Sample as PcmSample>::Signed>())
+                a.add_amp(b.to_dasp::<<F::Sample as PcmSample>::Signed>())
             })
         });
     }
@@ -297,7 +297,7 @@ impl<A> PlayingSample<A>
     {
         let map::Sample { base_hz, base_vel, audio } = sample;
         let playhead = Playhead::from_idx(idx, audio);
-        let rate_converter = sample::rate::Converter::scale_playback_hz(playhead, 1.0);
+        let rate_converter = dasp::signal::interpolate::Converter::scale_playback_hz(playhead, 1.0);
         PlayingSample {
             note_on_hz: hz,
             note_on_vel: vel,
@@ -343,8 +343,8 @@ impl<A> Iterator for Playhead<A>
 
 impl<'a, A, NF> Frames<'a, A, NF>
     where A: Audio,
-          <A::Frame as Frame>::Sample: sample::Duplex<f64>,
-          <<A::Frame as Frame>::Sample as PcmSample>::Float: sample::FromSample<f32>,
+          <A::Frame as Frame>::Sample: dasp::sample::Duplex<f64>,
+          <<A::Frame as Frame>::Sample as PcmSample>::Float: dasp::sample::FromSample<f32>,
           NF: instrument::NoteFreq,
 {
     /// Yields the next audio `Frame`.
@@ -371,7 +371,7 @@ impl<'a, A, NF> Frames<'a, A, NF>
                                     let amp = amp * voice.base_vel;
                                     let scaled = wave.scale_amp(amp.to_sample());
                                     return frame.zip_map(scaled, |f, s| {
-                                        f.add_amp(s.to_sample::<<<A::Frame as Frame>::Sample as PcmSample>::Signed>())
+                                        f.add_amp(s.to_dasp::<<<A::Frame as Frame>::Sample as PcmSample>::Signed>())
                                     });
                                 },
                                 None => return frame,
@@ -389,8 +389,8 @@ impl<'a, A, NF> Frames<'a, A, NF>
 
 impl<'a, A, NF> Iterator for Frames<'a, A, NF>
     where A: Audio,
-          <A::Frame as Frame>::Sample: sample::Duplex<f64>,
-          <<A::Frame as Frame>::Sample as PcmSample>::Float: sample::FromSample<f32>,
+          <A::Frame as Frame>::Sample: dasp::sample::Duplex<f64>,
+          <<A::Frame as Frame>::Sample as PcmSample>::Float: dasp::sample::FromSample<f32>,
           NF: instrument::NoteFreq,
 {
     type Item = A::Frame;

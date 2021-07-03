@@ -1113,9 +1113,9 @@ mod wav_audio {
     }
 
     impl<F> serde::Deserialize for wav::Audio<F>
-        where F: sample::Frame + serde::Deserialize,
-              F::Sample: sample::Duplex<f64> + sample::Duplex<i32>,
-              Box<[F::Sample]>: sample::ToBoxedFrameSlice<F>,
+        where F: dasp::Frame + serde::Deserialize,
+              F::Sample: dasp::Duplex<f64> + dasp::Duplex<i32>,
+              Box<[F::Sample]>: dasp::ToBoxedFrameSlice<F>,
     {
         fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
             where D: serde::Deserializer,
@@ -1125,9 +1125,9 @@ mod wav_audio {
             };
 
             impl<F> serde::de::Visitor for Visitor<F>
-                where F: sample::Frame + serde::Deserialize,
-                      F::Sample: sample::Duplex<f64> + sample::Duplex<i32>,
-                      Box<[F::Sample]>: sample::ToBoxedFrameSlice<F>,
+                where F: dasp::Frame + serde::Deserialize,
+                      F::Sample: dasp::Duplex<f64> + dasp::Duplex<i32>,
+                      Box<[F::Sample]>: dasp::ToBoxedFrameSlice<F>,
             {
                 type Value = wav::Audio<F>;
 

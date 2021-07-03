@@ -44,7 +44,7 @@ fn play_sample_from_playhead_idx<A>(idx: usize,
                                     map: &Map<A>) -> Option<PlayingSample<A>>
     where A: Audio,
 {
-    map.sample(hz, vel).map(|sample| PlayingSample::from_playhead_idx(idx, hz, vel, sample))
+    map.sample(hz, vel).map(|sample| PlayingSample::<A>::from_playhead_idx(idx, hz, vel, sample))
 }
 
 

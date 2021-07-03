@@ -7,7 +7,6 @@ extern crate time_calc as time;
 pub use audio::Audio;
 pub use map::{Map, Sample};
 pub use mode::Mode;
-pub use dasp::{Frames, Sampler};
 
 pub mod audio;
 pub mod dynamic;

@@ -13,13 +13,16 @@ homepage = "https://github.com/RustAudio/sampler"
 instrument = "0.2.0"
 pitch_calc = "0.11.0"
 time_calc = "0.11.0"
-dasp = "0.11.0"
 
 # optional dependencies
 hound = { optional = true, version = "2.0.0" }
 serde = { optional = true, version = "0.7.0" }
 serde_json = { optional = true, version = "0.7.0" }
 find_folder = { optional = true, version = "0.3.0" }
+
+[dependencies.dasp]
+version = "0.11.0"
+features = ["all"]
 
 [features]
 default = ["wav"]

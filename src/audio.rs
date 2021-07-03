@@ -97,7 +97,7 @@ pub mod wav {
 
 
     impl<F> super::Audio for Audio<F>
-        where F: sample::Frame,
+        where F: dasp::Frame,
     {
         type Frame = F;
         fn data(&self) -> &[Self::Frame] {
@@ -106,9 +106,9 @@ pub mod wav {
     }
 
     impl<F> Audio<F>
-        where F: sample::Frame,
-              F::Sample: sample::Duplex<f64> + sample::Duplex<i32>,
-              Box<[F::Sample]>: sample::ToBoxedFrameSlice<F>,
+        where F: dasp::Frame,
+              F::Sample: dasp::sample::Duplex<f64> + dasp::sample::Duplex<i32>,
+              Box<[F::Sample]>: dasp::slice::boxed::ToBoxedFrameSlice<F>,
     {
 
         /// Loads a `Sample` from the `.wav` file at the given `path`.
@@ -120,7 +120,8 @@ pub mod wav {
         pub fn from_file<P>(path: P, target_sample_hz: f64) -> Result<Self, Error>
             where P: AsRef<std::path::Path>,
         {
-            use dasp::{Frame, Sample, Signal};
+            use dasp::{Frame, Sample};
+            use dasp::signal::Signal;
 
             let path = path.as_ref();
             let mut wav_reader = try!(hound::WavReader::open(path));
@@ -135,13 +136,13 @@ pub mod wav {
             type WavReader = hound::WavReader<std::io::BufReader<std::fs::File>>;
             fn fill_samples<S, H>(samples: &mut Vec<S>, mut wav_reader: WavReader)
                     -> Result<(), hound::Error>
-                where S: sample::FromSample<i32>,
-                      H: sample::Sample + sample::ToSample<i32> + hound::Sample,
+                where S: dasp::sample::FromSample<i32>,
+                      H: dasp::Sample + dasp::sample::ToSample<i32> + hound::Sample,
             {
                 for sample in wav_reader.samples() {
                     let read_sample: H = try!(sample);
-                    let i32_sample: i32 = sample::Sample::to_sample(read_sample);
-                    samples.push(sample::Sample::to_sample(i32_sample));
+                    let i32_sample: i32 = dasp::Sample::to_sample(read_sample);
+                    samples.push(dasp::Sample::to_sample(i32_sample));
                 }
                 Ok(())
             }
@@ -160,11 +161,11 @@ pub mod wav {
                     24 => {
                         for sample in wav_reader.samples() {
                             let read_sample: i32 = try!(sample);
-                            let i24_sample = try!(sample::I24::new(read_sample)
+                            let i24_sample = try!(dasp::sample::I24::new(read_sample)
                                 .ok_or(hound::Error::FormatError("Incorrectly formatted 24-bit sample \
                                                             received from hound::read::WavSamples")));
-                            let i32_sample: i32 = sample::Sample::to_sample(i24_sample);
-                            samples.push(sample::Sample::to_sample(i32_sample));
+                            let i32_sample: i32 = dasp::Sample::to_sample(i24_sample);
+                            samples.push(dasp::Sample::to_sample(i32_sample));
                         }
                     },
                     n => return Err(Error::UnsupportedBitsPerSample(n)),
@@ -172,14 +173,14 @@ pub mod wav {
             }
 
             let boxed_samples = samples.into_boxed_slice();
-            let boxed_frames: Box<[F]> = match (spec.channels, F::n_channels() as u16) {
+            let boxed_frames: Box<[F]> = match (spec.channels, F::CHANNELS as u16) {
 
                 // In the case that the `spec` has a different number of channels to the actual
                 // slice, just collect as many valid frames as we can and discard the final
                 // mismatching frame.
                 (source, target) if source == target => {
                     let samples = boxed_samples.iter().cloned();
-                    let vec: Vec<F> = sample::signal::from_interleaved_samples(samples)
+                    let vec: Vec<F> = dasp::signal::from_interleaved_samples_iter(samples)
                         .collect();
                     vec.into_boxed_slice()
                 },
@@ -188,7 +189,7 @@ pub mod wav {
                 (2, 1) => {
                     let samples = boxed_samples.iter().cloned();
                     let vec: Vec<F> = 
-                        sample::signal::from_interleaved_samples::<_, [F::Sample; 2]>(samples)
+                        dasp::signal::from_interleaved_samples_iter::<_, [F::Sample; 2]>(samples)
                             .filter_map(|f| {
                                 let mut channels = f.channels();
                                 channels.next()
