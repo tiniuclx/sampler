@@ -1,7 +1,7 @@
 extern crate find_folder; // For easily finding the assets folder.
 extern crate portaudio as pa; // For audio I/O
 extern crate pitch_calc as pitch; // To work with musical notes.
-extern crate sample; // To convert portaudio sample buffers to frames.
+extern crate dasp; // To convert portaudio sample buffers to frames.
 extern crate sampler;
 
 use sampler::Sampler;

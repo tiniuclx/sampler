@@ -1073,7 +1073,7 @@ mod wav_audio {
     extern crate find_folder;
 
     use audio::wav;
-    use sample;
+    use dasp;
     use super::serde;
     use std;
 

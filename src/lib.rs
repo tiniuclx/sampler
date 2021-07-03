@@ -1,13 +1,13 @@
 #[cfg(feature="wav")] extern crate hound;
 pub extern crate instrument;
-pub extern crate sample;
+pub extern crate dasp;
 extern crate pitch_calc as pitch;
 extern crate time_calc as time;
 
 pub use audio::Audio;
 pub use map::{Map, Sample};
 pub use mode::Mode;
-pub use sampler::{Frames, Sampler};
+pub use dasp::{Frames, Sampler};
 
 pub mod audio;
 pub mod dynamic;

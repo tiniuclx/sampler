@@ -2,7 +2,7 @@ use audio::Audio;
 use instrument::{self, Instrument};
 use map::{self, Map};
 use pitch;
-use sample::{self, Frame, Sample as PcmSample};
+use dasp::{self, Frame, Sample as PcmSample};
 use std;
 use time;
 use Velocity;

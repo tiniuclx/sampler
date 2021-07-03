@@ -1,4 +1,4 @@
-use sample;
+use dasp;
 use std;
 
 
@@ -9,7 +9,7 @@ use std;
 /// implementations.
 pub trait Audio: Clone {
     /// The type of `Frame` data associated with the audio.
-    type Frame: sample::Frame;
+    type Frame: dasp::Frame;
     /// A reference to the slice of frames used to play the audio.
     fn data(&self) -> &[Self::Frame];
 }
@@ -69,7 +69,7 @@ impl<A> Audio for Range<A>
 #[cfg(feature="wav")]
 pub mod wav {
     use hound;
-    use sample;
+    use dasp;
     use std;
 
 
@@ -120,7 +120,7 @@ pub mod wav {
         pub fn from_file<P>(path: P, target_sample_hz: f64) -> Result<Self, Error>
             where P: AsRef<std::path::Path>,
         {
-            use sample::{Frame, Sample, Signal};
+            use dasp::{Frame, Sample, Signal};
 
             let path = path.as_ref();
             let mut wav_reader = try!(hound::WavReader::open(path));
